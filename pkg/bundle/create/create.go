@@ -1,12 +1,15 @@
 package create
 
 import (
+	"os"
+
 	bundle "github.com/RedHatGov/bundle/pkg/bundle"
+	archive "github.com/RedHatGov/bundle/pkg/bundle/archive"
 	"github.com/sirupsen/logrus"
 )
 
 // CreateFull performs all tasks in creating full imagesets
-func CreateFull(rootDir string) error {
+func CreateFull(ext string, rootDir string, segSize int64) error {
 	err := bundle.MakeCreateDirs(rootDir)
 	if err != nil {
 		logrus.Error(err)
@@ -28,19 +31,44 @@ func CreateFull(rootDir string) error {
 		return err
 	}
 	logrus.Info(config)
-	if &config.Mirror.Ocp != nil {
+
+	if config.Mirror.Ocp.Channels != nil {
 		bundle.GetReleases(&lastRun, config, rootDir)
 	}
-	/*if &config.Mirror.Operators != nil {
+	/*if config.Mirror.Operators != nil {
 	//GetOperators(*config, rootDir)
 	//}
-	//if &config.Mirror.Samples != nil {
+	//if config.Mirror.Samples != nil {
 	//GetSamples(*config, rootDir)
 	//}
-	//if &config.Mirror.AdditionalImages != nil {
+	//if config.Mirror.AdditionalImages != nil {
 	//	getAdditional(*config, rootDir)
 	//}
 	*/
+
+	// Create archiver
+	arc, err := archive.NewArchiver(ext)
+
+	if err != nil {
+		logrus.Errorf("failed to create archiver: %v", err)
+		return err
+	}
+
+	cwd, err := os.Getwd()
+
+	if err != nil {
+		return err
+	}
+
+	os.Chdir(rootDir)
+
+	logrus.Info("Creating split archive")
+	// Create tar archive
+	if err := archive.CreateSplitArchive(arc, cwd, "bundle", segSize, "."); err != nil {
+		logrus.Errorf("failed to create archive: %v", err)
+		return err
+	}
+
 	return nil
 }
 

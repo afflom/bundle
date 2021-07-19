@@ -6,6 +6,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type createOpts struct {
+	segSize int64
+}
+
 func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -21,7 +25,9 @@ func newCreateCmd() *cobra.Command {
 }
 
 func newCreateFullCmd() *cobra.Command {
-	return &cobra.Command{
+
+	opts := createOpts{}
+	cmd := &cobra.Command{
 		Use:   "full",
 		Short: "Create a full OCP related container image mirror",
 		Args:  cobra.ExactArgs(0),
@@ -29,13 +35,18 @@ func newCreateFullCmd() *cobra.Command {
 			cleanup := setupFileHook(rootOpts.dir)
 			defer cleanup()
 			logrus.Infoln("Create full called")
-			err := create.CreateFull(rootOpts.dir)
+			err := create.CreateFull(".tar.gz", rootOpts.dir, opts.segSize)
 			if err != nil {
 				logrus.Fatal(err)
 			}
 
 		},
 	}
+
+	f := cmd.Flags()
+	f.Int64VarP(&opts.segSize, "bytes", "b", 1000000000, "Size of rach segemented archive in bytes")
+
+	return cmd
 }
 
 func newCreateDiffCmd() *cobra.Command {

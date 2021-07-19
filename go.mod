@@ -6,6 +6,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/google/uuid v1.2.0
 	github.com/kr/text v0.2.0 // indirect
+	github.com/mholt/archiver/v3 v3.5.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/openshift/oc v0.0.0-alpha.0.0.20210612233142-1077b0516d5b
 	github.com/pkg/errors v0.9.1

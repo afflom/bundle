@@ -29,6 +29,8 @@ github.com/Microsoft/hcsshim/osversion
 github.com/PuerkitoBio/purell
 # github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
 github.com/PuerkitoBio/urlesc
+# github.com/andybalholm/brotli v1.0.0
+github.com/andybalholm/brotli
 # github.com/aws/aws-sdk-go v1.35.24
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
@@ -127,6 +129,13 @@ github.com/docker/go-metrics
 github.com/docker/go-units
 # github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 github.com/docker/libtrust
+# github.com/dsnet/compress v0.0.1
+github.com/dsnet/compress
+github.com/dsnet/compress/bzip2
+github.com/dsnet/compress/bzip2/internal/sais
+github.com/dsnet/compress/internal
+github.com/dsnet/compress/internal/errors
+github.com/dsnet/compress/internal/prefix
 # github.com/evanphx/json-patch v4.9.0+incompatible
 github.com/evanphx/json-patch
 # github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d
@@ -158,6 +167,8 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/golang/snappy v0.0.1
+github.com/golang/snappy
 # github.com/google/btree v1.0.0
 github.com/google/btree
 # github.com/google/go-cmp v0.5.4
@@ -190,6 +201,16 @@ github.com/inconshreveable/mousetrap
 github.com/jmespath/go-jmespath
 # github.com/json-iterator/go v1.1.10
 github.com/json-iterator/go
+# github.com/klauspost/compress v1.11.7
+github.com/klauspost/compress/flate
+github.com/klauspost/compress/fse
+github.com/klauspost/compress/gzip
+github.com/klauspost/compress/huff0
+github.com/klauspost/compress/snappy
+github.com/klauspost/compress/zstd
+github.com/klauspost/compress/zstd/internal/xxhash
+# github.com/klauspost/pgzip v1.2.5
+github.com/klauspost/pgzip
 # github.com/kr/text v0.2.0
 ## explicit
 # github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de
@@ -200,6 +221,9 @@ github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
 # github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369
 github.com/matttproud/golang_protobuf_extensions/pbutil
+# github.com/mholt/archiver/v3 v3.5.0
+## explicit
+github.com/mholt/archiver/v3
 # github.com/mitchellh/go-wordwrap v1.0.0
 github.com/mitchellh/go-wordwrap
 # github.com/moby/spdystream v0.2.0
@@ -220,6 +244,8 @@ github.com/modern-go/reflect2
 github.com/monochromegane/go-gitignore
 # github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
 ## explicit
+# github.com/nwaples/rardecode v1.1.0
+github.com/nwaples/rardecode
 # github.com/opencontainers/go-digest v1.0.0
 github.com/opencontainers/go-digest
 # github.com/opencontainers/image-spec v1.0.2-0.20190823105129-775207bd45b6
@@ -271,6 +297,12 @@ github.com/openshift/oc/pkg/helpers/image/dockerlayer
 github.com/openshift/oc/pkg/helpers/image/dockerlayer/add
 # github.com/peterbourgon/diskv v2.0.1+incompatible
 github.com/peterbourgon/diskv
+# github.com/pierrec/lz4/v4 v4.0.3
+github.com/pierrec/lz4/v4
+github.com/pierrec/lz4/v4/internal/lz4block
+github.com/pierrec/lz4/v4/internal/lz4errors
+github.com/pierrec/lz4/v4/internal/lz4stream
+github.com/pierrec/lz4/v4/internal/xxh32
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
@@ -305,6 +337,13 @@ github.com/spf13/pflag
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
+# github.com/ulikunitz/xz v0.5.9
+github.com/ulikunitz/xz
+github.com/ulikunitz/xz/internal/hash
+github.com/ulikunitz/xz/internal/xlog
+github.com/ulikunitz/xz/lzma
+# github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
+github.com/xi2/xz
 # github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca
 github.com/xlab/treeprint
 # go.opencensus.io v0.22.3
