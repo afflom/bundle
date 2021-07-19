@@ -97,16 +97,16 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 	splitFile, err := os.Create(splitPath)
 
 	if err != nil {
-		logrus.Errorf("error creating archive path %s: %v", splitPath, err)
 		return fmt.Errorf("creating %s: %v", splitPath, err)
 	}
+	defer splitFile.Close()
 
 	logrus.Infof("Creating archive %s", splitPath)
 	// Create a new tar archive for writing
 	if a.Create(splitFile); err != nil {
-		logrus.Errorf("error creating archive: %v", err)
 		return fmt.Errorf("creating archive %s: %v", splitPath, err)
 	}
+	defer a.Close()
 
 	sourceInfo, err := os.Stat(sourceDir)
 
