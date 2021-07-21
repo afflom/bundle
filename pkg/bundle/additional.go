@@ -21,10 +21,11 @@ func GetAdditional(i *BundleSpec, rootDir string) error {
 		ErrOut: os.Stderr,
 	}
 
+	// TODO: Add credential options
 	opts := mirror.NewMirrorImageOptions(stream)
 	opts.FileDir = rootDir + "/src/"
 
-	logrus.Debugf("Destination file set as %s", opts.FileDir)
+	logrus.Infof("Downloading %d image(s) to %s", len(i.Mirror.AdditionalImages), opts.FileDir)
 
 	for _, img := range i.Mirror.AdditionalImages {
 

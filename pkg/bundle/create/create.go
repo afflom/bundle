@@ -46,7 +46,6 @@ func CreateFull(ext string, rootDir string, segSize int64) error {
 
 	// User defined image download
 
-	logrus.Infof("Downloading specific images %v", config.Mirror.AdditionalImages[1:])
 	if config.Mirror.AdditionalImages != nil {
 		if err := bundle.GetAdditional(config, rootDir); err != nil {
 			return fmt.Errorf("error downloading additional images: %v", err)
