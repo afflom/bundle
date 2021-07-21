@@ -1,13 +1,12 @@
 package archive
 
 import (
+	"compress/flate"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
-
-	"compress/flate"
 
 	"github.com/mholt/archiver/v3"
 	"github.com/sirupsen/logrus"
@@ -17,12 +16,9 @@ type Archiver interface {
 	String() string
 	Archive([]string, string) error
 	Unarchive(string, string) error
-	Read() (archiver.File, error)
 	Write(archiver.File) error
-	Open(io.Reader, int64) error
 	Create(io.Writer) error
 	Close() error
-	Walk(string, archiver.WalkFunc) error
 }
 
 // NewArchiver create a new archiver for tar archive manipultation
@@ -45,6 +41,7 @@ func NewArchiver(ext string) (Archiver, error) {
 	}
 
 	// Check compression type (if using)
+	// TODO: Allow user to specify compression level
 	switch v := f.(type) {
 	case *archiver.Tar:
 		return mytar, nil
@@ -76,11 +73,10 @@ func CreateArchive(a Archiver, rootDir, output string) error {
 
 	logrus.Infof("Building bundle %s with directory %s", output, rootDir)
 
-	// Change directory to root and archive. ChDir needed for symlinks.
+	// Change directory to root and archive. Chdir needed for symlinks.
 	os.Chdir(rootDir)
 	if err := a.Archive([]string{"."}, filepath.Join(cwd, output)); err != nil {
-		logrus.Errorf("failed to archive bundle %s: %v", output, err)
-		return err
+		return fmt.Errorf("failed to archive bundle %s: %v", output, err)
 	}
 	return nil
 }
@@ -93,20 +89,18 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 	splitSize := int64(0)
 	splitPath := fmt.Sprintf("%s/%s_%06d.%s", destDir, prefix, splitNum, a.String())
 
-	// Open first split tar archive
+	// Create first split tar archive
 	splitFile, err := os.Create(splitPath)
 
 	if err != nil {
 		return fmt.Errorf("creating %s: %v", splitPath, err)
 	}
-	defer splitFile.Close()
 
-	logrus.Infof("Creating archive %s", splitPath)
 	// Create a new tar archive for writing
+	logrus.Infof("Creating archive %s", splitPath)
 	if a.Create(splitFile); err != nil {
 		return fmt.Errorf("creating archive %s: %v", splitPath, err)
 	}
-	defer a.Close()
 
 	sourceInfo, err := os.Stat(sourceDir)
 
@@ -114,7 +108,7 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 		return fmt.Errorf("%s: stat: %v", sourceDir, err)
 	}
 
-	return filepath.Walk(sourceDir, func(fpath string, info os.FileInfo, err error) error {
+	filepath.Walk(sourceDir, func(fpath string, info os.FileInfo, err error) error {
 
 		if err != nil {
 			return fmt.Errorf("traversing %s: %v", fpath, err)
@@ -146,26 +140,29 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 			ReadCloser: file,
 		}
 
-		// If the file is too large close the current tar archive and file
+		// If the file is too large create a new one
 		if info.Size()+splitSize > maxSplitSize {
 
+			// Current current tar archive
 			a.Close()
 			splitFile.Close()
 
-			// Create new tar archive for writing
+			// Increment split number and reset splitSize
 			splitNum += 1
 			splitSize = int64(0)
 			splitPath = fmt.Sprintf("%s/%s_%06d.%s", destDir, prefix, splitNum, a.String())
 
+			// Create a new tar archive for writing
+			logrus.Infof("Creating archive %s", splitPath)
+
 			splitFile, err = os.Create(splitPath)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("creating %s: %v", splitPath, err)
 			}
 
-			logrus.Infof("Creating archive %s", splitPath)
 			if err := a.Create(splitFile); err != nil {
-				return err
+				return fmt.Errorf("creating archive %s: %v", splitPath, err)
 			}
 
 		}
@@ -179,9 +176,14 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 
 		return nil
 	})
+
+	a.Close()
+	splitFile.Close()
+
+	return nil
 }
 
-// makeNameInArchive is a helper function pulled from mholt library
+// makeNameInArchive is a helper function pulled from mholt archiver library
 func makeNameInArchive(sourceInfo os.FileInfo, source, baseDir, fpath string) (string, error) {
 	name := filepath.Base(fpath) // start with the file or dir name
 	if sourceInfo.IsDir() {

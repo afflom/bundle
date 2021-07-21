@@ -12,6 +12,7 @@ go version 1.16
 
 Manual Build:
 ```
+sudo dnf install gpgme-devel libassuan-devel btrfs-progs-devel device-mapper-devel
 cd cmd/oc-bundle && go build .
 ```
 
@@ -27,9 +28,9 @@ Function test:
 mkdir -p cmd/oc-bundle/test/
 cp data/bundle-config.yaml cmd/oc-bundle/test/
 cp data/.metadata.json cmd/oc-bundle/test/src/publish
-cd cmd/oc-bundle
+make build
 go build .
-./oc-bundle create full --dir=test  --log-level=debug
+./bin/oc-bundle create full --dir=cmd/oc-bundle/test  --log-level=debug
 ```   
 
 

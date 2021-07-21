@@ -35,7 +35,10 @@ func newCreateFullCmd() *cobra.Command {
 			cleanup := setupFileHook(rootOpts.dir)
 			defer cleanup()
 			logrus.Infoln("Create full called")
-			err := create.CreateFull(".tar.gz", rootOpts.dir, opts.segSize)
+
+			// Convert size to bytes
+			segSizeBytes := opts.segSize * 1024 * 1024
+			err := create.CreateFull(".tar.gz", rootOpts.dir, segSizeBytes)
 			if err != nil {
 				logrus.Fatal(err)
 			}
@@ -44,7 +47,8 @@ func newCreateFullCmd() *cobra.Command {
 	}
 
 	f := cmd.Flags()
-	f.Int64VarP(&opts.segSize, "bytes", "b", 1000000000, "Size of rach segemented archive in bytes")
+	//TODO convert to bytes with input + suffix
+	f.Int64VarP(&opts.segSize, "archive-size", "s", 1000, "Size of each segemented archive in MB")
 
 	return cmd
 }
