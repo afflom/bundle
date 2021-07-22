@@ -68,7 +68,6 @@ func CreateFull(ext string, rootDir string, segSize int64) error {
 
 	os.Chdir(rootDir)
 
-	logrus.Info("Creating split archive")
 	// Create tar archive
 	if err := archive.CreateSplitArchive(arc, cwd, "bundle", segSize, "."); err != nil {
 		return fmt.Errorf("failed to create archive: %v", err)

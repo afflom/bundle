@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/mholt/archiver/v3"
@@ -19,6 +18,7 @@ type Archiver interface {
 	Write(archiver.File) error
 	Create(io.Writer) error
 	Close() error
+	Walk(string, archiver.WalkFunc) error
 }
 
 // NewArchiver create a new archiver for tar archive manipultation
@@ -118,7 +118,7 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 		}
 
 		// build the name to be used within the archive
-		nameInArchive, err := makeNameInArchive(sourceInfo, sourceDir, sourceDir, fpath)
+		nameInArchive, err := archiver.NameInArchive(sourceInfo, sourceDir, fpath)
 		if err != nil {
 			return fmt.Errorf("creating %s: %v", nameInArchive, err)
 		}
@@ -183,19 +183,16 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 	return nil
 }
 
-// makeNameInArchive is a helper function pulled from mholt archiver library
-func makeNameInArchive(sourceInfo os.FileInfo, source, baseDir, fpath string) (string, error) {
-	name := filepath.Base(fpath) // start with the file or dir name
-	if sourceInfo.IsDir() {
-		// preserve internal directory structure; that's the path components
-		// between the source directory's leaf and this file's leaf
-		dir, err := filepath.Rel(filepath.Dir(source), filepath.Dir(fpath))
-		if err != nil {
-			return "", err
-		}
-		// prepend the internal directory structure to the leaf name,
-		// and convert path separators to forward slashes as per spec
-		name = path.Join(filepath.ToSlash(dir), name)
-	}
-	return path.Join(baseDir, name), nil // prepend the base directory
+// ExtractArchive
+func ExtractArchive(a Archiver, src, dest string) error {
+	return a.Unarchive(src, dest)
+}
+
+// VerifyArchive will verify the contents of the archive against the provided metadata file
+// TODO: Add more verification actions
+func VerifyArchive(a Archiver, src string) error {
+	return a.Walk(src, func(f archiver.File) error {
+		fmt.Println("Filename:", f.Name())
+		return nil
+	})
 }
