@@ -2,7 +2,6 @@ package archive
 
 import (
 	"bufio"
-	"bytes"
 	"compress/flate"
 	"crypto/sha256"
 	"fmt"
@@ -88,13 +87,22 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 	splitNum := 0
 	splitSize := int64(0)
 	splitPath := fmt.Sprintf("%s/%s_%06d.%s", destDir, prefix, splitNum, a.String())
+	shaPath := fmt.Sprintf("%s/sha256sum.txt", destDir)
 
-	// Create first split tar archive
 	splitFile, err := os.Create(splitPath)
 
 	if err != nil {
 		return fmt.Errorf("creating %s: %v", splitPath, err)
 	}
+
+	// Create fsha256sum.txt file
+	shaFile, err := os.Create(shaPath)
+
+	if err != nil {
+		return fmt.Errorf("creating %s: %v", shaPath, err)
+	}
+
+	defer shaFile.Close()
 
 	// Create a new tar archive for writing
 	logrus.Infof("Creating archive %s", splitPath)
@@ -145,6 +153,12 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 
 			// Current current tar archive
 			a.Close()
+
+			// Calculate checksum and append to checksum file
+			if err := AppendChecksum(shaFile, splitPath); err != nil {
+				return fmt.Errorf("error appending checksum for %s: %v", splitPath, err)
+			}
+
 			splitFile.Close()
 
 			// Increment split number and reset splitSize
@@ -177,7 +191,14 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 		return nil
 	})
 
+	// Close final archive
 	a.Close()
+
+	// Calculate checksum and append to checksum file
+	if err := AppendChecksum(shaFile, splitPath); err != nil {
+		return fmt.Errorf("error appending checksum for %s: %v", splitPath, err)
+	}
+
 	splitFile.Close()
 
 	return nil
@@ -192,7 +213,7 @@ func ExtractArchive(a Archiver, src, dest string) error {
 // TODO: add more verification actions
 func VerifyArchive(a Archiver, src string) error {
 
-	scanForChecksum(src)
+	fmt.Println(scanForChecksum(src))
 	return a.Walk(src, func(f archiver.File) error {
 		fmt.Println("Filename:", f.Name())
 		return nil
@@ -200,35 +221,24 @@ func VerifyArchive(a Archiver, src string) error {
 }
 
 // getHash is a helper function to get the checksum of a bundle
-func generateCheckSum(input *os.File) []byte {
+func generateCheckSum(fpath string) (string, error) {
 
-	hash := sha256.New()
-	if _, err := io.Copy(hash, input); err != nil {
-		return nil
-	}
+	data, err := ioutil.ReadFile(fpath)
 
-	return hash.Sum(nil)
+	return fmt.Sprintf("%x", sha256.Sum256(data)), err
 }
 
-// appendChecksum will conca the checksum of the
+// AppendChecksum will conca the checksum of the
 //archive to the archive
-func appendChecksum(input string, sum []byte) error {
+func AppendChecksum(file *os.File, tarPath string) error {
 
-	var buf bytes.Buffer
-
-	// append checksum to file
-	b, err := ioutil.ReadFile(input)
-
+	sum, err := generateCheckSum(tarPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("error generating checksum for file %s: %v", file.Name(), err)
 	}
-
-	buf.Write(b)
-	buf.Write([]byte(delimeter))
-	buf.Write(sum)
-
-	if err = ioutil.WriteFile(input, buf.Bytes(), 0644); err != nil {
-		return fmt.Errorf("error writing file %s: %v", input, err)
+	// append checksum to file
+	if _, err = file.Write([]byte(sum + "\t" + tarPath + "\n")); err != nil {
+		return err
 	}
 
 	return nil
