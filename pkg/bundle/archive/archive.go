@@ -45,16 +45,9 @@ func NewArchiver(ext string) (Archiver, error) {
 	switch v := f.(type) {
 	case *archiver.Tar:
 		return mytar, nil
-	case *archiver.TarBz2:
-		v.Tar = mytar
-		v.CompressionLevel = flate.DefaultCompression
-		return v, nil
 	case *archiver.TarGz:
 		v.Tar = mytar
 		v.CompressionLevel = flate.DefaultCompression
-		return v, nil
-	case *archiver.TarZstd:
-		v.Tar = mytar
 		return v, nil
 	default:
 		return nil, fmt.Errorf("format does not support customization: %s", f)
@@ -183,13 +176,13 @@ func CreateSplitArchive(a Archiver, destDir, prefix string, maxSplitSize int64, 
 	return nil
 }
 
-// ExtractArchive
+// ExtractArchive will unpack the archive at the specified directory
 func ExtractArchive(a Archiver, src, dest string) error {
 	return a.Unarchive(src, dest)
 }
 
 // VerifyArchive will verify the contents of the archive against the provided metadata file
-// TODO: Add more verification actions
+// TODO: add more verification actions
 func VerifyArchive(a Archiver, src string) error {
 	return a.Walk(src, func(f archiver.File) error {
 		fmt.Println("Filename:", f.Name())

@@ -45,12 +45,18 @@ func GetAdditional(i *BundleSpec, rootDir string) error {
 			return fmt.Errorf("error parsing destination reference %s: %v", path, err)
 		}
 
-		// Create mapping from source and destination images
-		mappings = append(mappings, mirror.Mapping{
-			Source:      srcRef,
-			Destination: dstRef,
-			Name:        srcRef.Ref.Name,
-		})
+		// Check if image is specified as a blocked image
+		if IsBlocked(i, img) {
+			logrus.Warnf("Image %s specified as blocked, skipping...", img)
+			continue
+		} else {
+			// Create mapping from source and destination images
+			mappings = append(mappings, mirror.Mapping{
+				Source:      srcRef,
+				Destination: dstRef,
+				Name:        srcRef.Ref.Name,
+			})
+		}
 
 	}
 
