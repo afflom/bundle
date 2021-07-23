@@ -1,15 +1,22 @@
 package archive
 
 import (
+	"bufio"
+	"bytes"
 	"compress/flate"
+	"crypto/sha256"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/mholt/archiver/v3"
 	"github.com/sirupsen/logrus"
 )
+
+const delimeter = "__checksum__"
 
 type Archiver interface {
 	String() string
@@ -184,8 +191,81 @@ func ExtractArchive(a Archiver, src, dest string) error {
 // VerifyArchive will verify the contents of the archive against the provided metadata file
 // TODO: add more verification actions
 func VerifyArchive(a Archiver, src string) error {
+
+	scanForChecksum(src)
 	return a.Walk(src, func(f archiver.File) error {
 		fmt.Println("Filename:", f.Name())
 		return nil
 	})
+}
+
+// getHash is a helper function to get the checksum of a bundle
+func generateCheckSum(input *os.File) []byte {
+
+	hash := sha256.New()
+	if _, err := io.Copy(hash, input); err != nil {
+		return nil
+	}
+
+	return hash.Sum(nil)
+}
+
+// appendChecksum will conca the checksum of the
+//archive to the archive
+func appendChecksum(input string, sum []byte) error {
+
+	var buf bytes.Buffer
+
+	// append checksum to file
+	b, err := ioutil.ReadFile(input)
+
+	if err != nil {
+		return err
+	}
+
+	buf.Write(b)
+	buf.Write([]byte(delimeter))
+	buf.Write(sum)
+
+	if err = ioutil.WriteFile(input, buf.Bytes(), 0644); err != nil {
+		return fmt.Errorf("error writing file %s: %v", input, err)
+	}
+
+	return nil
+}
+
+// scanForChecksum
+func scanForChecksum(input string) (string, error) {
+
+	// Specify delimiter
+	r, _ := regexp.Compile(delimeter)
+
+	// Open input file
+	file, err := os.Open(input)
+	if err != nil {
+		return "", fmt.Errorf("error opening file %s: %v", input, err)
+	}
+
+	defer file.Close()
+
+	// Create file scanner
+	scanner := bufio.NewScanner(file)
+
+	// Scan each line and return subsequent string if
+	// delimeter is found
+	for scanner.Scan() {
+
+		if r.MatchString(scanner.Text()) {
+			fmt.Println(scanner.Text())
+			scanner.Scan()
+			return scanner.Text(), nil
+		}
+
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("scanner error %v", err)
+	}
+
+	return "", fmt.Errorf("checksum is not available in file %s", input)
 }

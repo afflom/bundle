@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/blang/semver/v4 v4.0.0
+	github.com/containers/image/v5 v5.10.2
 	github.com/google/uuid v1.2.0
 	github.com/mholt/archiver/v3 v3.5.0
 	github.com/openshift/oc v0.0.0-alpha.0.0.20210612233142-1077b0516d5b
