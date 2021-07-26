@@ -1,7 +1,7 @@
 package create
 
 import (
-	bundle "github.com/RedHatGov/bundle/pkg/bundle"
+	"github.com/RedHatGov/bundle/pkg/bundle"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,17 +28,17 @@ func CreateFull(rootDir string) error {
 		return err
 	}
 	logrus.Info(config)
-	if &config.Mirror.Ocp != nil {
+	if config.Mirror.Ocp.Channels != nil {
 		bundle.GetReleases(&lastRun, config, rootDir)
 	}
-	/*if &config.Mirror.Operators != nil {
+	/*if config.Mirror.Operators != nil {
 	//GetOperators(*config, rootDir)
 	//}
 	//if &config.Mirror.Samples != nil {
 	//GetSamples(*config, rootDir)
 	//}
-	//if &config.Mirror.AdditionalImages != nil {
-	//	getAdditional(*config, rootDir)
+	//if config.Mirror.AdditionalImages != nil {
+	//	GetAdditional(*config, rootDir)
 	//}
 	*/
 	return nil

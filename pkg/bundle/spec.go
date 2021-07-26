@@ -48,7 +48,7 @@ type AdditionalImages struct {
 
 type Ocp struct {
 	Graph    bool      `json:"graph,omitempty"`
-	Channels []channel `json:"channels,omitempty"`
+	Channels []Channel `json:"channels,omitempty"`
 }
 
 type Version struct {
@@ -62,11 +62,11 @@ type Operator struct {
 }
 
 type Package struct {
-	Name       string `json:"name"`
-	MinVersion string `json:"minVersion,omitempty"`
+	Name    string `json:"name"`
+	Version string `json:"minVersion,omitempty"`
 }
 
-type channel struct {
+type Channel struct {
 	Name     string   `json:"name"`
 	Versions []string `json:"versions"`
 }

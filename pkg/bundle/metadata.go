@@ -8,6 +8,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type Writer interface {
+}
+
 func ReadMeta(rootDir string) (Imagesets, error) {
 	metaPath := rootDir + metadata
 	if _, err := os.Stat(metaPath); err == nil {

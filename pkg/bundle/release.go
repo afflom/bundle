@@ -39,7 +39,7 @@ func getTLSConfig() (*tls.Config, error) {
 }
 
 // Next calculate the upgrade path from the current version to the channel's latest
-func calculateUpgradePath(b channel, v semver.Version) (Update, []Update, error) {
+func calculateUpgradePath(b Channel, v semver.Version) (Update, []Update, error) {
 
 	upstream, err := url.Parse(UpdateUrl)
 	if err != nil {
@@ -78,7 +78,7 @@ func calculateUpgradePath(b channel, v semver.Version) (Update, []Update, error)
 //func downloadRelease(c channel) error {
 //	// Download the referneced versions by channel
 //}
-func GetLatestVersion(b channel) (Update, error) {
+func GetLatestVersion(b Channel) (Update, error) {
 
 	upstream, err := url.Parse(UpdateUrl)
 	if err != nil {
@@ -189,6 +189,7 @@ func downloadMirror(i string, rootDir string) error {
 
 	opts.From = i
 	opts.ToDir = rootDir + "/src/"
+	//opts.ToMirror = true
 
 	if err := opts.Run(); err != nil {
 		return err
