@@ -15,6 +15,7 @@ import (
 type Archiver interface {
 	String() string
 	Archive([]string, string) error
+	Extract(string, string, string) error
 	Unarchive(string, string) error
 	Write(archiver.File) error
 	Create(io.Writer) error
@@ -171,6 +172,25 @@ func ExtractArchive(a Archiver, src, dest string) error {
 	return a.Unarchive(src, dest)
 }
 
+// ExtractFile retrieves a single file from an archive
+func ExtractFile(a Archiver, src, target, dest string) error {
+	return a.Extract(src, target, dest)
+}
+
+func openArchive(a Archiver, path string) error {
+	inFile, err := os.Open(path)
+
+	if err != nil {
+		return fmt.Errorf("could not open current file %s: %v", path, err)
+	}
+
+	// Open the tar archive for reading
+	if err := a.Open(inFile, 0); err != nil {
+		return fmt.Errorf("error opening archive %s: %v", path, err)
+	}
+	return nil
+}
+
 // CombineArchives take a list of archives and combines them into one file
 func CombineArchives(in Archiver, out Archiver, destDir, name string, paths ...string) error {
 
@@ -191,15 +211,8 @@ func CombineArchives(in Archiver, out Archiver, destDir, name string, paths ...s
 	for _, p := range paths {
 
 		// Read in the source tar archive
-		inFile, err := os.Open(p)
-
-		if err != nil {
-			return fmt.Errorf("could not open current file %s: %v", p, err)
-		}
-
-		// Open the tar archive for reading
-		if err := in.Open(inFile, 0); err != nil {
-			return fmt.Errorf("error opening archive %s: %v", p, err)
+		if err := openArchive(in, p); err != nil {
+			logrus.Error(err)
 		}
 
 		// Loop through the files in the source tar

@@ -50,11 +50,11 @@ func (b *localDirBackend) init() error {
 }
 
 // WriteMetadata reads the provided metadata from disk.
-func (b *localDirBackend) ReadMetadata(_ context.Context, meta *v1alpha1.Metadata) error {
+func (b *localDirBackend) ReadMetadata(_ context.Context, meta *v1alpha1.Metadata, path string) error {
 
-	logrus.Debugf("looking for metadata file at %q", config.MetadataBasePath)
+	logrus.Debugf("looking for metadata file at %q", path)
 
-	data, err := afero.ReadFile(b.fs, config.MetadataBasePath)
+	data, err := afero.ReadFile(b.fs, path)
 	if err != nil {
 		// Non-existent metadata is allowed.
 		if errors.Is(err, os.ErrNotExist) {
